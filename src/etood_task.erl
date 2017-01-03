@@ -20,7 +20,13 @@ init(Server, Name, Exp) ->
 loop(State=#state{server=Server, name=N, expire=[Exp|Next]}) ->
   receive
     {Server, Ref, cancel} ->
-      Server ! {Ref, ok}
+      Server ! {Ref, ok};
+
+    {Server, Ref, {renew, NewExp}} ->
+      NewState = State#state{expire=datetime_expire(NewExp)},
+      Server ! {Ref, ok},
+      loop(NewState)
+
   after Exp * 1000 ->
     case Next of
       [] -> Server ! {done, N};
@@ -55,4 +61,12 @@ cancel(Pid) ->
       erlang:demonitor(Ref, [flush]),
       ok;
     {'DOWN', Ref, process, Pid, _Reason} -> ok
+  end.
+
+
+renew(Pid, Exp) ->
+  Ref = make_ref(),
+  Pid ! {self(), Ref, {renew, Exp}},
+  receive
+    {Ref, ok} -> ok
   end.

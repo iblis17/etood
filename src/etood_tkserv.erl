@@ -61,6 +61,18 @@ loop(State=#state{tasks=Tasks, clients=Clients}) ->
       Pid ! {Ref, ok},
       loop(State#state{tasks=NewT});
 
+    {Pid, Ref, {renew, Name, Exp}} ->
+      Msg =
+        case orddict:find(Name, Tasks) of
+          {ok, T} ->
+            etood_task:renew(T, Exp);
+          error ->
+            {error, task_not_found}
+        end,
+
+      Pid ! {Ref, Msg},
+      loop(State);
+
     {done, Name} ->
       NewT =
         case orddict:find(Name, Tasks) of
@@ -136,6 +148,17 @@ cancel(Name) ->
     {error, timeout}
   end.
 
+
+renew(Name, Exp) ->
+  Ref = make_ref(),
+
+  ?MODULE ! {self(), Ref, {renew, Name, Exp}},
+
+  receive
+    {Ref, Msg} -> Msg
+  after 5000 ->
+    {error, timeout}
+  end.
 
 valid_datetime({Date={_, _, _}, Time={_, _, _}}) ->
   calendar:valid_date(Date) andalso valid_time(Time);
