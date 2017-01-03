@@ -1,4 +1,4 @@
--module(task).
+-module(etood_task).
 
 -compile(export_all).
 

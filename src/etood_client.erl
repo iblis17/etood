@@ -1,4 +1,4 @@
--module(client).
+-module(etood_client).
 
 -compile(export_all).
 

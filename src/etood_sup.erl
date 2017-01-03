@@ -1,4 +1,4 @@
--module(sup).
+-module(etood_sup).
 
 -compile(export_all).
 
@@ -19,7 +19,7 @@ init() ->
 
 
 loop() ->
-  Pid = tkserv:start_link(),
+  Pid = etood_tkserv:start_link(),
   receive
     {'EXIT', _From, shutdown} ->
       exit(shutdown);

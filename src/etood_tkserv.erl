@@ -1,4 +1,4 @@
--module(tkserv).
+-module(etood_tkserv).
 
 -compile(export_all).
 
@@ -35,7 +35,7 @@ loop(State=#state{tasks=Tasks, clients=Clients}) ->
     {Pid, Ref, {add, Name, Desc, Exp}} ->
       case valid_datetime(Exp) of
         true ->
-          Task = task:start_link(Name, Exp),
+          Task = etood_task:start_link(Name, Exp),
           NewT = orddict:store(Name,
                                #task{name=Name, desc=Desc, pid=Task},
                                Tasks),
@@ -52,7 +52,7 @@ loop(State=#state{tasks=Tasks, clients=Clients}) ->
       NewT =
         case orddict:find(Name, Tasks) of
           {ok, T} ->
-            ok = task:cancel(T#task.pid),
+            ok = etood_task:cancel(T#task.pid),
             orddict:erase(Name, Tasks);
           error ->
             Tasks
